@@ -76,7 +76,7 @@ function rcFooter() {
         </div>
       </div>
       <div class="rc-footer-bottom">
-        © 2025 <span>RC Center</span> — Celebrating Vinayaka Chavithi with Unity & Culture ✦
+        © 2025    <span>RC Center</span> — Celebrating Vinayaka Chavithi with Unity & Culture ✦
       </div>
     </footer>
   `);
