@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -43,6 +43,7 @@
     <div class="admin-tabs">
       <button class="tab-btn active" onclick="switchTab('festival',this)">🎊 Festival</button>
       <button class="tab-btn" onclick="switchTab('reel',this)">🎬 Reel</button>
+      <button class="tab-btn" onclick="switchTab('gallery',this)">🖼️ Gallery</button>
     </div>
 
     <!-- FESTIVAL TAB -->
@@ -89,6 +90,36 @@
       </div>
     </div>
 
+    <!-- GALLERY TAB -->
+    <div class="tab-panel" id="galleryTab">
+      <div class="admin-section">
+        <h3>Upload Gallery File</h3>
+        <div class="form-group">
+          <label class="form-label">Year (e.g. 2025)</label>
+          <input type="text" id="galleryYear" class="rc-input" placeholder="2025">
+        </div>
+        <div class="form-group">
+          <label class="form-label">File Type</label>
+          <div class="rc-input" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;padding:.75rem 1rem;">
+            <label style="cursor:pointer;"><input type="radio" name="galleryType" value="photo" checked onchange="updateGalleryFileAccept('photo')"> Photo</label>
+            <label style="cursor:pointer;"><input type="radio" name="galleryType" value="video" onchange="updateGalleryFileAccept('video')"> Video</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Direct Image/Video URL</label>
+          <input type="url" id="galleryUrl" class="rc-input" placeholder="https://example.com/image.jpg or https://example.com/video.mp4">
+          <small style="color:var(--muted);font-size:.8rem;margin-top:.25rem;display:block;">
+            Upload to free hosting like Imgur, YouTube, or GitHub first
+          </small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Caption</label>
+          <input type="text" id="galleryCaption" class="rc-input" placeholder="Caption or description">
+        </div>
+        <button class="btn-full" onclick="addGalleryUrl()">Add to Gallery →</button>
+      </div>
+    </div>
+
     <p id="message" class="form-msg" style="margin-top:1rem;"></p>
 
     <button onclick="logout()" style="width:100%;margin-top:1.5rem;background:transparent;border:1px solid #f87171;color:#f87171;padding:.8rem;border-radius:99px;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;transition:.2s;" onmouseover="this.style.background='rgba(248,113,113,.1)'" onmouseout="this.style.background='transparent'">
@@ -102,7 +133,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+<!-- Firebase Config & Modules -->
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/firebase-storage.js"></script>
 <script src="js/admin.js"></script>
 <script>
   function switchTab(tab, btn) {
