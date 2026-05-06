@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -41,57 +41,65 @@
     </div>
   </section>
 
+  
+
+  <!-- Repeat for other years -->
+
 </div>
 
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+<!-- Firebase Config & Modules -->
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/ui.js"></script>
 <script>
   rcNavbar('gallery.html');
   rcFooter();
 
-  const db = firebase.firestore();
+  // Load celebration years from Firestore
+  async function loadYears() {
+    const result = await getYearsSummary();
+    const yearsDiv = document.getElementById('years');
+    const loadingState = document.getElementById('loadingState');
 
-  db.collection("years").orderBy(firebase.firestore.FieldPath.documentId(), "desc").get()
-    .then((data) => {
-      document.getElementById('loadingState').style.display = 'none';
-      const yearsDiv = document.getElementById('years');
-      yearsDiv.style.display = 'grid';
+    if (!result.success) {
+      loadingState.innerHTML = `<p style="color:#f87171;">❌ Failed to load data: ${result.error}</p>`;
+      return;
+    }
 
-      if (data.empty) {
-        yearsDiv.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">🎊 No celebration years added yet. Check back soon!</div>`;
-        return;
-      }
+    if (!result.years || result.years.length === 0) {
+      loadingState.innerHTML = `<div class="empty-state">🎊 No celebration years added yet. Check back soon!</div>`;
+      return;
+    }
 
-      data.forEach((doc) => {
-        const year = doc.id;
-        const info = doc.data();
-        yearsDiv.innerHTML += `
-          <div class="year-card fade-in" onclick="location.href='year.html?year=${year}'">
-            <div class="year-num">${year}</div>
-            <p>${info.title || 'Vinayaka Chavithi'}</p>
-            <span class="btn-saffron" style="display:inline-flex;padding:.7rem 1.8rem;font-size:.88rem;">
-              Open Gallery →
-            </span>
-          </div>`;
-      });
+    loadingState.style.display = 'none';
+    yearsDiv.style.display = 'grid';
 
-      // re-trigger observer for dynamically added cards
-      setTimeout(() => {
-        document.querySelectorAll('.fade-in:not(.visible)').forEach(el => {
-          const obs = new IntersectionObserver(entries => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-          }, { threshold: 0.1 });
-          obs.observe(el);
-        });
-      }, 100);
-    })
-    .catch((err) => {
-      document.getElementById('loadingState').innerHTML = `<p style="color:#f87171;">Failed to load data. Please check your Firebase config.</p>`;
-      console.error(err);
+    result.years.forEach(yearInfo => {
+      yearsDiv.innerHTML += `
+        <div class="year-card fade-in" onclick="location.href='year.html?year=${yearInfo.id}'">
+          <div class="year-num">${yearInfo.id}</div>
+          <p>${yearInfo.title || 'Vinayaka Chavithi'}</p>
+        </div>`;
     });
+
+    // Trigger fade-in animation
+    setTimeout(() => {
+      document.querySelectorAll('.fade-in:not(.visible)').forEach(el => {
+        const obs = new IntersectionObserver(entries => {
+          entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+        }, { threshold: 0.1 });
+        obs.observe(el);
+      });
+    }, 100);
+  }
+
+  // Load years on page load
+  window.addEventListener('load', loadYears);
 </script>
 </body>
 </html>
