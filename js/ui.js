@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════
+ /* ═══════════════════════════════════
    RC CENTER — SHARED NAV + FOOTER JS
    ═══════════════════════════════════ */
 
@@ -76,7 +76,7 @@ function rcFooter() {
         </div>
       </div>
       <div class="rc-footer-bottom">
-        © 2025    <span>RC Center</span> — Celebrating Vinayaka Chavithi with Unity & Culture ✦
+        © 2026 <span>RC Center</span> — Celebrating Vinayaka Chavithi with Unity & Culture ✦
       </div>
     </footer>
   `);
