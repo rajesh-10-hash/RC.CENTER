@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════
+ /* ═══════════════════════════════════════
    RC CENTER — SAFFRON & DARK FESTIVAL CSS
    ═══════════════════════════════════════ */
 
@@ -29,11 +29,27 @@ html { scroll-behavior: smooth; }
 body {
   font-family: 'Nunito', sans-serif;
   background: var(--dark);
+  background-image: url('../images/background1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: var(--text);
   overflow-x: hidden;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.7);
+  z-index: -1;
 }
 
 /* ── SCROLLBAR ── */
@@ -181,7 +197,12 @@ body {
 /* ══════════════════════════════
    PAGE WRAPPER / CONTENT
 ══════════════════════════════ */
-.page-content { padding-top: 72px; flex: 1; }
+.page-content {
+  padding-top: 72px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
 
 /* ══════════════════════════════
    HERO (index)
@@ -190,7 +211,7 @@ body {
   min-height: 100vh;
   background:
     linear-gradient(160deg, rgba(0,0,0,.75) 0%, rgba(0,0,0,.55) 100%),
-    url('../images/bg.jpg') center/cover no-repeat;
+    url('../images/background1.jpg') center/cover no-repeat;
   display: flex; align-items: center; justify-content: center;
   text-align: center; padding: 6rem 5% 4rem;
   position: relative; overflow: hidden;
