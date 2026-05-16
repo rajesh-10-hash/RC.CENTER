@@ -10,119 +10,183 @@
     .admin-tabs {
       display: flex; gap: .5rem; margin-bottom: 2rem;
       border-bottom: 1px solid var(--border); padding-bottom: 1rem;
+      flex-wrap: wrap;
     }
     .tab-btn {
       background: none; border: 1px solid var(--border);
-      color: var(--muted); padding: .6rem 1.4rem;
+      color: var(--muted); padding: .6rem 1.3rem;
       border-radius: 99px; cursor: pointer;
-      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .88rem;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .85rem;
       transition: background .2s, color .2s, border-color .2s;
     }
-    .tab-btn.active,
-    .tab-btn:hover {
-      background: var(--saffron); color: var(--dark);
-      border-color: var(--saffron);
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--saffron); color: var(--dark); border-color: var(--saffron);
     }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
+    .upload-area {
+      border: 2px dashed rgba(255,140,0,.35);
+      border-radius: 16px; padding: 2.5rem;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: rgba(255,140,0,.03);
+      margin-bottom: 1.2rem;
+    }
+    .upload-area:hover, .upload-area.dragging {
+      border-color: var(--saffron); background: rgba(255,140,0,.07);
+    }
+    .upload-area .upload-icon { font-size: 2.5rem; margin-bottom: .6rem; }
+    .upload-area p { color: var(--muted); font-size: .88rem; margin: 0; }
+    .upload-area strong { color: var(--saffron); }
+    #fileInput { display: none; }
+    .img-preview-wrap { display:none; margin-bottom:1.2rem; text-align:center; }
+    .img-preview-wrap img { max-height:180px; border-radius:12px; border:1px solid var(--border); object-fit:cover; }
+    .img-preview-wrap p { font-size:.78rem; color:var(--muted); margin-top:.5rem; }
+    .progress-wrap { display:none; margin-bottom:1rem; }
+    .progress-bar-bg { background:var(--dark4); border-radius:99px; height:8px; overflow:hidden; }
+    .progress-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--saffron),var(--gold)); border-radius:99px; transition:width .3s ease; }
+    .progress-label { font-size:.78rem; color:var(--muted); margin-top:.4rem; text-align:center; }
+    .config-notice {
+      background:rgba(255,140,0,.08); border:1px solid rgba(255,140,0,.25);
+      border-radius:12px; padding:1rem 1.2rem; margin-bottom:1.5rem;
+      font-size:.83rem; color:var(--muted); line-height:1.7;
+    }
+    .config-notice strong { color:var(--saffron); }
+    .admin-section-title {
+      font-family:'Cinzel',serif; font-size:.95rem; color:var(--saffron);
+      margin-bottom:1.2rem; padding-bottom:.6rem; border-bottom:1px solid var(--border);
+    }
+    .uploaded-link-box {
+      display:none; background:var(--dark4); border:1px solid rgba(0,200,150,.3);
+      border-radius:10px; padding:.8rem 1rem; margin-bottom:1rem;
+    }
+    .uploaded-link-box p { font-size:.75rem; color:#4ade80; margin-bottom:.3rem; font-weight:700; }
+    .uploaded-link-box input { width:100%; background:transparent; border:none; color:var(--text); font-size:.82rem; outline:none; }
   </style>
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════
+     FIREBASE MUST LOAD FIRST — IN <HEAD> ORDER
+     ══════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- YOUR FIREBASE CONFIG — MUST BE RIGHT AFTER FIREBASE SCRIPTS -->
+<script src="js/firebase.js"></script>
+
 <div class="page-content">
-<section class="auth-section" style="align-items:flex-start;padding-top:6rem;">
-  <div class="auth-box" style="max-width:520px;">
+<section class="auth-section" style="align-items:flex-start;padding-top:5rem;padding-bottom:3rem;">
+  <div class="auth-box" style="max-width:540px;width:100%;">
 
     <div class="auth-logo">
       <img src="images/logo.png" onerror="this.style.display='none'">
       <h2>RC Center Admin</h2>
-      <p>Manage Festivals & Reels</p>
+      <p>Manage Festivals, Photos &amp; Reels</p>
+    </div>
+
+    <div class="config-notice">
+      ☁️ <strong>Cloudinary:</strong> Fill in your
+      <strong>CLOUD_NAME</strong> and <strong>UPLOAD_PRESET</strong>
+      in the script below. Get them free at <strong>cloudinary.com</strong>
     </div>
 
     <!-- TABS -->
     <div class="admin-tabs">
-      <button class="tab-btn active" onclick="switchTab('festival',this)">🎊 Festival</button>
-      <button class="tab-btn" onclick="switchTab('reel',this)">🎬 Reel</button>
-      <button class="tab-btn" onclick="switchTab('gallery',this)">🖼️ Gallery</button>
+      <button class="tab-btn active" onclick="switchTab('photo',this)">📸 Add Photo</button>
+      <button class="tab-btn" onclick="switchTab('reel',this)">🎬 Add Reel</button>
+      <button class="tab-btn" onclick="switchTab('festival',this)">🎊 Add Festival</button>
     </div>
 
-    <!-- FESTIVAL TAB -->
-    <div class="tab-panel active" id="festivalTab">
-      <div class="admin-section">
-        <h3>Add Festival Year</h3>
-        <div class="form-group">
-          <label class="form-label">Year</label>
-          <input type="text" id="year" class="rc-input" placeholder="e.g. 2025">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Festival Title</label>
-          <input type="text" id="title" class="rc-input" placeholder="e.g. Vinayaka Chavithi 2025">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Instagram Link</label>
-          <input type="text" id="instagram" class="rc-input" placeholder="Instagram profile/post link">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description</label>
-          <textarea id="description" class="rc-input" placeholder="Short festival description..."></textarea>
-        </div>
-        <button class="btn-full" onclick="saveFestival()">Save Festival →</button>
+    <!-- TAB: PHOTO -->
+    <div class="tab-panel active" id="photoTab">
+      <div class="admin-section-title">Upload Photo to Gallery</div>
+      <div class="upload-area" id="uploadArea"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave()"
+           ondrop="handleDrop(event)">
+        <div class="upload-icon">📷</div>
+        <p><strong>Click to choose image</strong> or drag &amp; drop</p>
+        <p style="margin-top:.3rem;font-size:.78rem;">JPG, PNG, WEBP — Max 10MB</p>
       </div>
+      <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+      <div class="img-preview-wrap" id="previewWrap">
+        <img id="previewImg" src="" alt="Preview">
+        <p id="previewName"></p>
+      </div>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">Uploading...</div>
+      </div>
+      <div class="uploaded-link-box" id="uploadedLinkBox">
+        <p>✅ Uploaded! Image URL:</p>
+        <input type="text" id="uploadedUrl" readonly onclick="this.select()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Festival Year</label>
+        <input type="text" id="photoYear" class="rc-input" placeholder="e.g. 2025">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photo Caption</label>
+        <input type="text" id="photoCaption" class="rc-input" placeholder="Caption for this photo">
+      </div>
+      <button class="btn-full" onclick="uploadAndSave()" id="uploadBtn">
+        ☁️ Upload &amp; Save to Gallery
+      </button>
     </div>
 
-    <!-- REEL TAB -->
+    <!-- TAB: REEL -->
     <div class="tab-panel" id="reelTab">
-      <div class="admin-section">
-        <h3>Add Instagram Reel</h3>
-        <div class="form-group">
-          <label class="form-label">Year (e.g. 2025)</label>
-          <input type="text" id="reelYear" class="rc-input" placeholder="2025">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Reel Caption</label>
-          <input type="text" id="caption" class="rc-input" placeholder="Caption for this reel">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Instagram Reel Link</label>
-          <input type="text" id="reelLink" class="rc-input" placeholder="https://www.instagram.com/reel/...">
-        </div>
-        <button class="btn-full" onclick="addReel()">Add Reel →</button>
+      <div class="admin-section-title">Add Instagram Reel</div>
+      <div class="form-group">
+        <label class="form-label">Festival Year</label>
+        <input type="text" id="reelYear" class="rc-input" placeholder="e.g. 2025">
       </div>
+      <div class="form-group">
+        <label class="form-label">Reel Caption</label>
+        <input type="text" id="caption" class="rc-input" placeholder="Caption for this reel">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instagram Reel Link</label>
+        <input type="text" id="reelLink" class="rc-input" placeholder="https://www.instagram.com/reel/...">
+      </div>
+      <button class="btn-full" onclick="addReel()">🎬 Add Reel</button>
     </div>
 
-    <!-- GALLERY TAB -->
-    <div class="tab-panel" id="galleryTab">
-      <div class="admin-section">
-        <h3>Upload Gallery File</h3>
-        <div class="form-group">
-          <label class="form-label">Year (e.g. 2025)</label>
-          <input type="text" id="galleryYear" class="rc-input" placeholder="2025">
-        </div>
-        <div class="form-group">
-          <label class="form-label">File Type</label>
-          <div class="rc-input" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;padding:.75rem 1rem;">
-            <label style="cursor:pointer;"><input type="radio" name="galleryType" value="photo" checked onchange="updateGalleryFileAccept('photo')"> Photo</label>
-            <label style="cursor:pointer;"><input type="radio" name="galleryType" value="video" onchange="updateGalleryFileAccept('video')"> Video</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Direct Image/Video URL</label>
-          <input type="url" id="galleryUrl" class="rc-input" placeholder="https://example.com/image.jpg or https://example.com/video.mp4">
-          <small style="color:var(--muted);font-size:.8rem;margin-top:.25rem;display:block;">
-            Upload to free hosting like Imgur, YouTube, or GitHub first
-          </small>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Caption</label>
-          <input type="text" id="galleryCaption" class="rc-input" placeholder="Caption or description">
-        </div>
-        <button class="btn-full" onclick="addGalleryUrl()">Add to Gallery →</button>
+    <!-- TAB: FESTIVAL -->
+    <div class="tab-panel" id="festivalTab">
+      <div class="admin-section-title">Add Festival Year</div>
+      <div class="form-group">
+        <label class="form-label">Year</label>
+        <input type="text" id="year" class="rc-input" placeholder="e.g. 2025">
       </div>
+      <div class="form-group">
+        <label class="form-label">Festival Title</label>
+        <input type="text" id="title" class="rc-input" placeholder="e.g. Vinayaka Chavithi 2025">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instagram Link</label>
+        <input type="text" id="instagram" class="rc-input" placeholder="Instagram profile/post link">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="description" class="rc-input" placeholder="Short festival description..."></textarea>
+      </div>
+      <button class="btn-full" onclick="saveFestival()">🎊 Save Festival</button>
     </div>
 
     <p id="message" class="form-msg" style="margin-top:1rem;"></p>
 
-    <button onclick="logout()" style="width:100%;margin-top:1.5rem;background:transparent;border:1px solid #f87171;color:#f87171;padding:.8rem;border-radius:99px;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;transition:.2s;" onmouseover="this.style.background='rgba(248,113,113,.1)'" onmouseout="this.style.background='transparent'">
+    <button onclick="logout()"
+      style="width:100%;margin-top:1.5rem;background:transparent;border:1px solid #f87171;
+             color:#f87171;padding:.8rem;border-radius:99px;cursor:pointer;font-weight:700;
+             font-family:'Nunito',sans-serif;transition:.2s;"
+      onmouseover="this.style.background='rgba(248,113,113,.1)'"
+      onmouseout="this.style.background='transparent'">
       Logout
     </button>
 
@@ -130,24 +194,168 @@
 </section>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-
-<!-- Firebase Config & Modules -->
-<script src="js/firebase-config.js"></script>
-<script src="js/firebase-auth.js"></script>
-<script src="js/firebase-db.js"></script>
-<script src="js/firebase-storage.js"></script>
+<!-- UI + ADMIN JS — LOAD AFTER HTML -->
+<script src="js/ui.js"></script>
 <script src="js/admin.js"></script>
+
 <script>
+  /* ══════════════════════════════════════
+     ⚙️ CLOUDINARY CONFIG — FILL THESE IN
+     ══════════════════════════════════════ */
+  const CLOUD_NAME    = "dp67lh8la";
+  const UPLOAD_PRESET = "q6zwxvs4";
+  /* ══════════════════════════════════════ */
+
+  /* Wait for Firebase to be ready */
+  let db;
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      db = firebase.firestore();
+      console.log("✅ Firebase ready");
+    } catch(e) {
+      console.error("❌ Firebase init failed:", e);
+      showMsg('❌ Firebase not initialized. Check js/firebase.js', 'error');
+    }
+  });
+
   function switchTab(tab, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(tab + 'Tab').classList.add('active');
     btn.classList.add('active');
+    clearMsg();
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('uploadArea').classList.add('dragging');
+  }
+  function handleDragLeave() {
+    document.getElementById('uploadArea').classList.remove('dragging');
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadArea').classList.remove('dragging');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      loadPreview(file);
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('fileInput').files = dt.files;
+    }
+  }
+
+  function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) loadPreview(file);
+  }
+  function loadPreview(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('previewName').textContent =
+        file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      document.getElementById('previewWrap').style.display = 'block';
+      document.getElementById('uploadedLinkBox').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.className = 'form-msg ' + (type || '');
+  }
+  function clearMsg() {
+    document.getElementById('message').textContent = '';
+  }
+  function setProgress(pct, label) {
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = label;
+  }
+
+  async function uploadAndSave() {
+    /* Check Firebase first */
+    if (!db) {
+      try { db = firebase.firestore(); }
+      catch(e) {
+        return showMsg('❌ Firebase not ready. Check your js/firebase.js file.', 'error');
+      }
+    }
+
+    const file    = document.getElementById('fileInput').files[0];
+    const year    = document.getElementById('photoYear').value.trim();
+    const caption = document.getElementById('photoCaption').value.trim();
+
+    if (!file)    return showMsg('⚠️ Please select an image.', 'error');
+    if (!year)    return showMsg('⚠️ Please enter the festival year.', 'error');
+    if (!caption) return showMsg('⚠️ Please enter a caption.', 'error');
+    if (CLOUD_NAME === 'YOUR_CLOUD_NAME')
+      return showMsg('⚠️ Please set CLOUD_NAME and UPLOAD_PRESET in the script.', 'error');
+
+    const btn = document.getElementById('uploadBtn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    document.getElementById('progressWrap').style.display = 'block';
+    setProgress(10, 'Preparing...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', UPLOAD_PRESET);
+      formData.append('folder', `rc-center/${year}`);
+
+      setProgress(35, 'Uploading to Cloudinary...');
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+
+      if (!res.ok) throw new Error('Cloudinary upload failed. Check CLOUD_NAME & UPLOAD_PRESET.');
+      const data = await res.json();
+      const imageUrl = data.secure_url;
+
+      setProgress(75, 'Saving to database...');
+
+      document.getElementById('uploadedUrl').value = imageUrl;
+      document.getElementById('uploadedLinkBox').style.display = 'block';
+
+      /* Save to Firestore */
+      await db.collection('years').doc(year).collection('posts').add({
+        type: 'photo',
+        image: imageUrl,
+        caption: caption,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('years').doc(year).set(
+        { title: `Vinayaka Chavithi ${year}` },
+        { merge: true }
+      );
+
+      setProgress(100, 'Done!');
+      showMsg('✅ Photo uploaded and saved to gallery!', 'success');
+
+      setTimeout(() => {
+        document.getElementById('fileInput').value = '';
+        document.getElementById('previewWrap').style.display = 'none';
+        document.getElementById('progressWrap').style.display = 'none';
+        document.getElementById('photoCaption').value = '';
+        btn.disabled = false;
+        btn.textContent = '☁️ Upload & Save to Gallery';
+        setProgress(0, '');
+      }, 2500);
+
+    } catch (err) {
+      console.error(err);
+      showMsg('❌ Upload failed: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = '☁️ Upload & Save to Gallery';
+      document.getElementById('progressWrap').style.display = 'none';
+    }
   }
 </script>
+
 </body>
 </html>
