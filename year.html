@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -13,15 +13,13 @@
       font-weight: 700; font-size: .9rem;
       padding: .5rem 1rem; border-radius: 99px;
       border: 1px solid var(--border);
-      transition: background .2s;
-      margin-bottom: 1.5rem;
+      transition: background .2s; margin-bottom: 1.5rem;
     }
-    .back-btn:hover { background: rgba(255,140,0,.08); color: var(--saffron); }
+    .back-btn:hover { background: rgba(255,140,0,.08); }
 
-    /* ── PHOTO CARD ── */
+    /* ── CARDS ── */
     .post-card {
-      border-radius: 20px;
-      overflow: hidden;
+      border-radius: 20px; overflow: hidden;
       background: #1a1a1a;
       border: 1px solid rgba(255,140,0,.18);
       transition: transform .25s, box-shadow .25s;
@@ -29,91 +27,83 @@
     .post-card:hover {
       transform: translateY(-7px);
       box-shadow: 0 0 28px rgba(255,140,0,.35);
-      border-color: rgba(255,140,0,.45);
-    }
-    .post-card img {
-      width: 100%;
-      aspect-ratio: 4/3;
-      object-fit: cover;
-      display: block;
+      border-color: rgba(255,140,0,.5);
     }
 
-    /* ── CAPTION AREA ── */
+    /* ── PHOTO ── */
+    .post-card img {
+      width: 100%; aspect-ratio: 4/3;
+      object-fit: cover; display: block;
+    }
+
+    /* ── VIDEO ── */
+    .post-card video {
+      width: 100%; aspect-ratio: 4/3;
+      object-fit: cover; display: block;
+      background: #000;
+    }
+
+    /* ── CAPTION ── */
     .post-body {
-      padding: 1rem 1.2rem 1.4rem;
-      background: #1a1a1a;
+      padding: 1rem 1.2rem 1.3rem;
       border-top: 1px solid rgba(255,140,0,.1);
     }
     .post-caption {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #ffffff;
-      line-height: 1.5;
-      margin: 0;
+      font-size: .98rem; font-weight: 700;
+      color: #fff; line-height: 1.5; margin: 0;
+      display: flex; align-items: flex-start; gap: .5rem;
     }
-    .post-caption-dot {
-      display: inline-block;
-      width: 6px; height: 6px;
-      background: var(--saffron);
-      border-radius: 50%;
-      margin-right: .5rem;
-      vertical-align: middle;
-      margin-bottom: 2px;
+    .caption-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--saffron); flex-shrink: 0;
+      margin-top: .45rem;
     }
 
-    /* ── REEL CARD ── */
+    /* ── MEDIA TYPE BADGE ── */
+    .media-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      padding: .2rem .7rem; border-radius: 99px;
+      margin-bottom: .6rem;
+    }
+    .badge-photo  { background: rgba(255,140,0,.12); color: var(--saffron); }
+    .badge-video  { background: rgba(56,189,248,.12); color: #38bdf8; }
+    .badge-reel   { background: rgba(236,72,153,.12); color: #ec4899; }
+
+    /* ── REEL ── */
     .reel-thumb {
-      aspect-ratio: 4/3;
-      background: linear-gradient(135deg, #1a1a1a, #222);
+      aspect-ratio: 4/3; background: linear-gradient(135deg,#1a1a1a,#222);
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: .8rem;
-      border-bottom: 1px solid rgba(255,140,0,.1);
+      align-items: center; justify-content: center; gap: .8rem;
     }
     .reel-thumb span { font-size: 3.5rem; }
     .reel-thumb p { color: var(--muted); font-size: .85rem; margin: 0; }
-
-    .ig-badge {
-      display: inline-flex; align-items: center; gap: .4rem;
-      background: rgba(255,140,0,.1); border: 1px solid var(--border);
-      color: var(--saffron); font-size: .72rem; font-weight: 700;
-      padding: .22rem .8rem; border-radius: 99px;
-      text-transform: uppercase; letter-spacing: .08em;
-      margin-bottom: .7rem;
-    }
   </style>
 </head>
 <body>
 
 <div class="page-content">
 
-  <!-- INNER HERO -->
   <section class="inner-hero" style="padding-bottom:3rem;">
     <a href="gallery.html" class="back-btn">← Back to Gallery</a>
     <div class="hero-badge">✦ RC Center Celebrations</div>
-    <h1 class="hero-title" id="yearTitle" style="font-size:clamp(2.5rem,7vw,5rem);">
-      Loading...
-    </h1>
+    <h1 class="hero-title" id="yearTitle" style="font-size:clamp(2.5rem,7vw,5rem);">Loading...</h1>
     <p id="yearDesc" class="hero-sub" style="margin:1rem auto 0;max-width:500px;display:none;"></p>
   </section>
 
-  <!-- POSTS -->
   <section style="padding:4rem 5%;">
     <div style="max-width:1100px;margin:0 auto;">
-
       <div id="loadingState" style="text-align:center;padding:4rem;color:var(--muted);">
         <div style="font-size:2rem;margin-bottom:1rem;">⏳</div>
         <p>Loading posts...</p>
       </div>
-
       <div id="posts" class="posts-grid" style="display:none;"></div>
-
     </div>
   </section>
 
 </div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
@@ -129,7 +119,6 @@
   document.getElementById("yearTitle").innerHTML =
     `<span class="highlight">${year}</span> Celebrations`;
 
-  // Load year description
   db.collection("years").doc(year).get().then(doc => {
     if (doc.exists && doc.data().description) {
       const desc = document.getElementById("yearDesc");
@@ -138,7 +127,6 @@
     }
   });
 
-  // Load posts
   db.collection("years").doc(year).collection("posts")
     .orderBy("createdAt", "desc")
     .get()
@@ -148,10 +136,7 @@
       postsDiv.style.display = 'grid';
 
       if (data.empty) {
-        postsDiv.innerHTML = `
-          <div class="empty-state" style="grid-column:1/-1;">
-            📸 No posts added yet for ${year}.
-          </div>`;
+        postsDiv.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">📸 No posts added yet for ${year}.</div>`;
         return;
       }
 
@@ -163,42 +148,55 @@
             <div class="post-card fade-in">
               <img src="${post.image}" alt="${post.caption}" loading="lazy">
               <div class="post-body">
+                <div class="media-badge badge-photo">📸 Photo</div>
                 <p class="post-caption">
-                  <span class="post-caption-dot"></span>${post.caption}
+                  <span class="caption-dot"></span>${post.caption}
                 </p>
               </div>
             </div>`;
+
+        } else if (post.type === "video") {
+          postsDiv.innerHTML += `
+            <div class="post-card fade-in">
+              <video controls preload="metadata">
+                <source src="${post.image}" type="video/mp4">
+                Your browser does not support video.
+              </video>
+              <div class="post-body">
+                <div class="media-badge badge-video">🎬 Video</div>
+                <p class="post-caption">
+                  <span class="caption-dot" style="background:#38bdf8;"></span>${post.caption}
+                </p>
+              </div>
+            </div>`;
+
         } else {
           postsDiv.innerHTML += `
             <div class="post-card fade-in">
               <div class="reel-thumb">
-                <span>🎬</span>
+                <span>📱</span>
                 <p>Instagram Reel</p>
               </div>
               <div class="post-body">
-                <div class="ig-badge">📸 Instagram Reel</div>
+                <div class="media-badge badge-reel">📱 Reel</div>
                 <p class="post-caption" style="margin-bottom:.9rem;">
-                  <span class="post-caption-dot"></span>${post.caption}
+                  <span class="caption-dot" style="background:#ec4899;"></span>${post.caption}
                 </p>
                 <a href="${post.instagram}" target="_blank"
                    class="btn-saffron"
                    style="display:inline-flex;width:100%;justify-content:center;font-size:.88rem;padding:.7rem 1rem;">
-                  Watch Reel →
+                  Watch on Instagram →
                 </a>
               </div>
             </div>`;
         }
       });
 
-      // Trigger fade-in
       setTimeout(() => {
         document.querySelectorAll('.fade-in:not(.visible)').forEach(el => {
           const obs = new IntersectionObserver(entries => {
             entries.forEach(e => {
-              if (e.isIntersecting) {
-                e.target.classList.add('visible');
-                obs.unobserve(e.target);
-              }
+              if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
             });
           }, { threshold: 0.08 });
           obs.observe(el);
@@ -207,7 +205,7 @@
     })
     .catch(err => {
       document.getElementById('loadingState').innerHTML =
-        `<p style="color:#f87171;">Failed to load posts. Check Firebase config.</p>`;
+        `<p style="color:#f87171;">Failed to load. Check Firebase config.</p>`;
       console.error(err);
     });
 </script>
