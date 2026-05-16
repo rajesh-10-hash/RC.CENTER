@@ -109,6 +109,7 @@
     <div class="admin-tabs">
       <button class="tab-btn active" onclick="switchTab('photo',this)">📸 Photo</button>
       <button class="tab-btn" onclick="switchTab('video',this)">🎬 Video</button>
+      <button class="tab-btn" onclick="switchTab('group',this)">👥 Group</button>
       <button class="tab-btn" onclick="switchTab('reel',this)">📱 Reel</button>
       <button class="tab-btn" onclick="switchTab('festival',this)">🎊 Festival</button>
     </div>
@@ -200,6 +201,48 @@
       </div>
       <button class="btn-full" onclick="uploadMedia('video')" id="videoUploadBtn">
         ☁️ Upload Video &amp; Save
+      </button>
+    </div>
+
+    <!-- ══ TAB: GROUP PHOTO ══ -->
+    <div class="tab-panel" id="groupTab">
+      <div class="admin-section-title">👥 Upload Group Photo</div>
+      <p style="color:var(--muted);font-size:.83rem;margin-bottom:1rem;line-height:1.6;">
+        Group photos appear <strong style="color:var(--saffron);">first</strong> in the homepage slideshow banner — perfect for community & team photos!
+      </p>
+      <div class="upload-area" id="groupUploadArea"
+           onclick="document.getElementById('groupInput').click()"
+           ondragover="dragOver(event,'groupUploadArea')"
+           ondragleave="dragLeave('groupUploadArea')"
+           ondrop="dropFile(event,'groupInput','groupUploadArea','image')">
+        <div class="upload-icon">👥</div>
+        <p><strong>Click to choose group photo</strong> or drag &amp; drop</p>
+        <p style="margin-top:.3rem;font-size:.76rem;">JPG, PNG, WEBP — Max 10MB</p>
+      </div>
+      <input type="file" id="groupInput" accept="image/*"
+             onchange="previewFile('groupInput','groupPreviewWrap','groupPreview','groupPreviewName','image')">
+      <div class="preview-wrap" id="groupPreviewWrap">
+        <img id="groupPreview" src="" alt="Preview">
+        <p id="groupPreviewName"></p>
+      </div>
+      <div class="progress-wrap" id="groupProgressWrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="groupProgressFill"></div></div>
+        <div class="progress-label" id="groupProgressLabel">Uploading...</div>
+      </div>
+      <div class="uploaded-link-box" id="groupLinkBox">
+        <p>✅ Group photo uploaded!</p>
+        <input type="text" id="groupUploadedUrl" readonly onclick="this.select()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Festival Year</label>
+        <input type="text" id="groupYear" class="rc-input" placeholder="e.g. 2025">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Caption</label>
+        <input type="text" id="groupCaption" class="rc-input" placeholder="e.g. RC Center Family 2025">
+      </div>
+      <button class="btn-full" onclick="uploadGroup()" id="groupUploadBtn">
+        👥 Upload Group Photo &amp; Save
       </button>
     </div>
 
@@ -430,7 +473,72 @@
     }
   }
 
-  function setProgress(fillId, labelId, pct, label) {
+  async function uploadGroup() {
+    if (!db) {
+      try { db = firebase.firestore(); }
+      catch(e) { return showMsg('❌ Firebase not ready. Check js/firebase.js', 'error'); }
+    }
+    const file    = document.getElementById('groupInput').files[0];
+    const year    = document.getElementById('groupYear').value.trim();
+    const caption = document.getElementById('groupCaption').value.trim();
+    if (!file)    return showMsg('⚠️ Please select a group photo.', 'error');
+    if (!year)    return showMsg('⚠️ Please enter the festival year.', 'error');
+    if (!caption) return showMsg('⚠️ Please enter a caption.', 'error');
+
+    const btn = document.getElementById('groupUploadBtn');
+    btn.disabled = true; btn.textContent = 'Uploading...';
+    document.getElementById('groupProgressWrap').style.display = 'block';
+    setProgress('groupProgressFill','groupProgressLabel', 15, 'Uploading to Cloudinary...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', UPLOAD_PRESET);
+      formData.append('folder', `rc-center/${year}/group`);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+      if (!res.ok) throw new Error('Cloudinary upload failed.');
+      const data = await res.json();
+      const imageUrl = data.secure_url;
+
+      setProgress('groupProgressFill','groupProgressLabel', 80, 'Saving to database...');
+      document.getElementById('groupUploadedUrl').value = imageUrl;
+      document.getElementById('groupLinkBox').style.display = 'block';
+
+      await db.collection('years').doc(year).collection('posts').add({
+        type: 'group',
+        image: imageUrl,
+        caption: caption,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await db.collection('years').doc(year).set(
+        { title: `Vinayaka Chavithi ${year}` }, { merge: true }
+      );
+
+      setProgress('groupProgressFill','groupProgressLabel', 100, 'Done! ✅');
+      showMsg('✅ Group photo saved! It will appear first in the homepage slideshow.', 'success');
+
+      setTimeout(() => {
+        document.getElementById('groupInput').value = '';
+        document.getElementById('groupPreviewWrap').style.display = 'none';
+        document.getElementById('groupProgressWrap').style.display = 'none';
+        document.getElementById('groupCaption').value = '';
+        btn.disabled = false;
+        btn.textContent = '👥 Upload Group Photo & Save';
+        setProgress('groupProgressFill','groupProgressLabel', 0, '');
+      }, 2500);
+
+    } catch(err) {
+      console.error(err);
+      showMsg('❌ Upload failed: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = '👥 Upload Group Photo & Save';
+      document.getElementById('groupProgressWrap').style.display = 'none';
+    }
+  }
     document.getElementById(fillId).style.width = pct + '%';
     document.getElementById(labelId).textContent = label;
   }
