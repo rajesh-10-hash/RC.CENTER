@@ -7,6 +7,7 @@ function rcNavbar(activePage) {
     { href: 'index.html',        label: 'Home' },
     { href: 'about.html',        label: 'About' },
     { href: 'gallery.html',      label: 'Gallery' },
+    { href: 'group.html',        label: '👥 Group Photos' },
     { href: 'achievements.html', label: 'Achievements' },
     { href: 'contact.html',      label: 'Contact' },
     { href: 'login.html',        label: '⚙ Admin', cls: 'nav-admin' },
@@ -76,7 +77,7 @@ function rcFooter() {
         </div>
       </div>
       <div class="rc-footer-bottom">
-        © 2026 <span>RC Center</span> — Celebrating Vinayaka Chavithi with Unity & Culture ✦
+        © 2024 <span>RC Center</span> — Celebrating Vinayaka Chavithi with Unity & Culture ✦
       </div>
     </footer>
   `);
